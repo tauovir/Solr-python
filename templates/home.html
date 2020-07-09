@@ -1,0 +1,42 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+</head>
+    <body>
+    
+        <h1> Hi Solar</h1>
+
+        <p>We will search here</p>
+          
+        <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Sex</th>
+                <th scope="col">Embark</th>
+                <th scope="col">Cabin</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in records %}
+              <tr>
+                <th scope="row">{{row.id}}</th>
+                <td>{{row.name}}</td>
+                <td>{{row.sex}}</td>
+                <td>{{row.embarked}}</td>
+                <td>{{row.cabin}}</td>
+               
+              </tr>
+              {% endfor %}
+              
+            </tbody>
+          </table>
+    </body>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</html>

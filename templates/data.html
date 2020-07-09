@@ -1,0 +1,201 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block mainBody%}
+
+
+  <!-- /.card-header -->
+  <div class="card-body" style="display: none" id = "saveDataId">
+    <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Add New Records to Solr</h3>
+    </div>
+
+    <form role="form" action="{% url 'solr-add' %}" method="POST">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- text input -->
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" class="form-control" name = "name" placeholder="Enter name">
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Gender</label>
+            <select class="form-control" name = 'sex'>
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- textarea -->
+          <div class="form-group">
+            <label>Age</label>
+            <input type="text" class="form-control" name = "age" placeholder="Enter name">
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Fare</label>
+            <input type="text" class="form-control" name = "fare" placeholder="Enter name">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- textarea -->
+          <div class="form-group">
+            <label>Embark</label>
+            <select class="form-control" name = 'embarked'>
+              <option>C</option>
+              <option>Q</option>
+              <option>S</option>
+              <option>Q</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Cabin</label>
+            <select class="form-control" name = 'cabin'>
+              <option>G6</option>
+              <option>D56</option>
+              <option>C23</option>
+              <option>C25</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+  </div>
+  <!-- /.card-body -->
+
+<div class="card-body">
+  <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Filters</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+      <form role="form">
+        <div class="row">
+          <!-- <div class="col-sm-6">
+          
+            <p><bold>Select Columns</bold></p>
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input class="custom-control-input" type="checkbox" id="customCheckbox2" checked disabled>
+                <label for="customCheckbox2" class="custom-control-label">Name</label>
+              </div>
+              <div class="custom-control custom-checkbox">
+                <input class="custom-control-input" type="checkbox" id="customCheckbox1">
+                <label for="customCheckbox1" class="custom-control-label">Sex</label>
+              </div>
+              <div class="custom-control custom-checkbox">
+                <input class="custom-control-input" type="checkbox" id="customCheckbox2">
+                <label for="customCheckbox2" class="custom-control-label">Age</label>
+              </div>
+              <div class="custom-control custom-checkbox">
+                <input class="custom-control-input" type="checkbox" id="customCheckbox3">
+                <label for="customCheckbox3" class="custom-control-label">Fare</label>
+              </div>
+            </div>
+          </div>  -->
+          <div class="col-sm-6">
+            <!-- radio -->
+            <div class="form-group">
+              <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" id="customRadio1" name="sex" value="male" {% if request.GET.sex == "male" %} checked {% endif %}>
+                <label for="customRadio1" class="custom-control-label">Only Male</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" id="customRadio2" name="sex" value="female" {% if request.GET.sex == "female" %} checked {% endif %}>
+                <label for="customRadio2" class="custom-control-label">Only female</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      
+
+       
+        
+      
+      </form>
+    </div>
+    <!-- /.card-body -->
+  </div>
+
+  <table id="example2" class="table table-bordered table-hover">
+    <thead>
+    <tr>
+      <!-- <th>ID</th> -->
+      <th>Name</th>
+      <th>Sex</th>
+      <th>Age</th>
+      <th>Fare</th>
+      <th>Embark</th>
+      <th>Cabin</th>
+      <th>Trash</th>
+    </tr>
+    </thead>
+    <tbody>
+      {% for row in records %}
+      <tr>
+        <!-- <th scope="row">{{row.id}}</th> -->
+        <th scope="row">{{row.name}}</th>
+        <td>{{row.sex}}</td>
+        <td>{{row.age}}</td>
+        <td>{{row.fare}}</td>
+        <td>{{row.embarked}}</td>
+        <td>{{row.cabin}}</td>
+        <td><a href= {% url 'delete' row.id %}>
+          Delete
+        </a></td>
+        
+      </tr>
+      {% endfor %}
+  </table>
+</div>
+
+
+{% endblock %}
+
+{% block jsScript%}
+<script src="{% static  "plugins/datatables/jquery.dataTables.js" %}"></script>
+<script src="{% static  "plugins/datatables-bs4/js/dataTables.bootstrap4.js" %}"></script>
+<script>
+
+  $(function () {
+    
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "pageLength": 20
+    });
+    
+
+    $('input[type=radio]').on('change', function() {
+    $(this).closest("form").submit();
+});
+
+  });
+  
+ 
+</script>
+
+{% endblock %}
