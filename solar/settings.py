@@ -130,4 +130,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media/') # Path where we want to store outr 
 
 #========================Solr Configuration=====================
 SOLR_BASE_URL = 'http://localhost:8983/solr/'
-SOLR_CORE = 'solrTrain'
+SOLR_CORE = 'solrTitanic' # Core or Collection name

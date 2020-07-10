@@ -37,18 +37,19 @@ def home(request):
     # Later, searching is easy. In the simple case, just a plain Lucene-style
     # # query is fine.
     # results = solr.search('*')
-    query = '*' if not query_search else 'Name:' + query_search 
-    print(query)
+    query = '*' if not query_search else query_search 
+   
     results  = solr.search(query, **{
     'start' : 0,
-    'rows': 30,
+    'rows': 20,
     'fq' : '' if sex == None else 'Sex:' + f_sex , # fl is filter quere
     # 'fl' : 'id Name Age Sex', # Filter List
         })
    
     # results = solr.search('Sex:male and orange')
+    print("================New result===================")
     records = setData(results)
-    context = {'records' : records}
+    context = {'titanicData' : records['titanic'],'retailData':records['retail']}
     return render(request, 'data.html', context)
     # return render(request, 'home.html', context)
     
@@ -58,19 +59,35 @@ Format data so that we can use in web page
 """
 def setData(results):
 
-    records = []
-    print(results)
+    records = {}
+    retailList = []
+    titanicList = []
     for result in results:
         row = {}
-        row['name'] = result['Name'][0]
-        row['sex'] = result['Sex'][0]
-        row['cabin'] = result['Cabin'][0] if 'Cabin' in result else 'c15'
-        row['embarked'] = result['Embarked'][0] if 'Embarked' in result else 'C'
-        row['age'] = int(result['Age'][0]) if 'Age' in result else 30
-        row['fare'] = result['Fare'][0] if 'Fare' in result else 300
-        row['id'] = result['id']
-        records.append(row)
+        if 'Cabin' in result:
+            row['name'] = result['Name']
+            row['sex'] = result['Sex']
+            row['cabin'] = result['Cabin'] if 'Cabin' in result else 'c15'
+            row['embarked'] = result['Embarked'] if 'Embarked' in result else 'C'
+            row['age'] = int(result['Age']) if 'Age' in result else 30
+            row['fare'] = result['Fare'] if 'Fare' in result else 300
+            row['id'] = result['id']
+            titanicList.append(row)
+        elif 'InvoiceNo' in result:
+            row['InvoiceNo'] = result['InvoiceNo']
+            row['StockCode'] = result['StockCode']
+            row['Description'] = result['Description']
+            row['Quantity'] = result['Quantity']
+            row['InvoiceDate'] = result['InvoiceDate']
+            row['UnitPrice'] = result['UnitPrice']
+            row['CustomerID'] = result['CustomerID']
+            row['Country'] = result['Country']
+            row['id'] = result['id']
+            retailList.append(row)
 
+
+    records['titanic'] = titanicList
+    records['retail'] = retailList
     return records
 
 
