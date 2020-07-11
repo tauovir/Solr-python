@@ -102,13 +102,22 @@
               </div>
             </div>
           </div>
+          <div class="col-sm-6">
+          <!-- radio -->
+          <div class="form-group">
+            <div class="custom-control custom-radio">
+              <input class="custom-control-input" type="radio" id="customRadio3" name="sort" value="asc" {% if request.GET.sort == "asc" %} checked {% endif %}>
+              <label for="customRadio3" class="custom-control-label">Age Ascending</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input class="custom-control-input" type="radio" id="customRadio4" name="sort" value="desc" {% if request.GET.sort == "desc" %} checked {% endif %}>
+              <label for="customRadio4" class="custom-control-label">Age Descending</label>
+            </div>
+          </div>
         </div>
 
-      
-
+        </div>
        
-        
-      
       </form>
     </div>
     <!-- /.card-body -->
@@ -213,7 +222,7 @@
       "paging": true,
       "lengthChange": false,
       "searching": false,
-      "ordering": true,
+      "ordering": false,
       "info": true,
       "autoWidth": false,
       "pageLength": 20
