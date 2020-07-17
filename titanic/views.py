@@ -8,6 +8,8 @@ import simplejson
 from django.conf import settings
 from django.contrib import messages
 import pysolr
+from SolrClient import SolrClient
+from titanic.solrSchema import SolrSchema,SolrCollection
 
 """
 This function is for initiatiing solr instance
@@ -35,7 +37,7 @@ def home(request):
 
     # Do a health check.
     solr.ping()
-    print("solar conected")
+    print("solr conected")
     # Later, searching is easy. In the simple case, just a plain Lucene-style
     # # query is fine.
     # results = solr.search('*')
@@ -43,18 +45,18 @@ def home(request):
    
     results  = solr.search(query, **{
     'start' : 0,
-    'rows': 100,
-    'fq' : '' if sex == None else 'Sex:' + f_sex , # fl is filter quere age_sort
+    'rows': 10,
+    'fq' : '' if sex == None or sex == '' else 'Sex:' + f_sex , # fl is filter quere age_sort
     'sort' : '' if age_sort == None or age_sort == '' else 'Age ' + age_sort 
     # 'fl' : 'id Name Age Sex', # Filter List
         })
    
     # results = solr.search('Sex:male and orange')
-    print("================New result===================")
+
     records = setData(results)
     context = {'titanicData' : records['titanic'],'retailData':records['retail']}
     return render(request, 'data.html', context)
-    # return render(request, 'home.html', context)
+
     
 
 """
@@ -75,6 +77,7 @@ def setData(results):
             row['age'] = int(result['Age']) if 'Age' in result else 30
             row['fare'] = result['Fare'] if 'Fare' in result else 300
             row['id'] = result['id']
+            
             titanicList.append(row)
         elif 'InvoiceNo' in result:
             row['InvoiceNo'] = result['InvoiceNo'] if 'InvoiceNo' in result else '9999'
@@ -151,16 +154,122 @@ def migrate(request):
     return redirect('home')   
 
 
-def addField():
+
+def createSchema(request):
+    import json 
+    dict1 = {}
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL, settings.SOLR_CORE)
+    print("===================Create Schema==============")
+    # response = createField() #createField()
+    # print("==================Add Fields================")
+    # fields = {'name':'mango30','type':'text_general','stored':True}
+    # response = solrSchema.addFields(fields)
+    # print("==================Replace Fields================")
+    # fields = {'name':'mango30','type':'pfloat','stored':True,'multiValued':True}
+    # response = solrSchema.replaceField(fields)
+
+    # print("==================Add Copy Fields================")
+    # fields = {'source':'khanishere22','dest':'location'}
+    # response = solrSchema.deleteCopyField(fields)
+    # response = solrSchema.retrieveEntrireSchema()
+    # # dict1['name'] = 'mango30'
+    # # response = solrSchema.deleteSingleFiled(dict1)
+    # records = json.loads(response.content)
+    # responseHeader = records['responseHeader']
+    # schema = records['schema']
+    # print(schema['fields'])
+    
+    # response = solrSchema.getFieldLists(fl = 'CompanyTag,khanAge',wt = 'xml')
+    # response = solrSchema.getDynamicFieldLists(fieldName = '*_i')
+    # response = solrSchema.getCopyFields()
+    # response = solrSchema.getSchemaName()
+    #=====================================================Collection=====================
+    colc = SolrCollection(settings.SOLR_BASE_URL)
+    # response = colc.createCollection(name = 'khanCloud',numShards = 2,shards = 'shared101,shared102')
+    # response = colc.reloadCollection(name = 'khanCloud')
+    
+    # response = colc.getCollectionList()renameCollection
+    # response = colc.renameCollection(name='khanCloud',target='shipCloude')
+    # response = colc.renameCollection.__doc__ 
+    # response = solrSchema.addFields.__doc__ 
+    help(SolrSchema) # # to access Class docstring 
+    help(SolrSchema.addFields) # # to access Class docstring 
+    
+    # print((response))
+    # print(response.content)
+
+    print("==========================Response End==================")
+    return redirect('home')  
+
+
+def createField():
+        import requests
+        url = "http://localhost:8983/solr/dataFromClient/schema"
+
+        # payload = "{\"add-field\":{\"name\":\"khanishere\",\"type\":\"text_general\",\"stored\":true }}"
+        headers = {
+        'Content-type': 'application/json'
+        }
+        # payload = "{'add-field':[{'name':'OrgTag','type':'text_general','stored':True },{'name':'CompanyTag','type':'text_general','stored':True }]}"
+        fieldList = []
+        dict1 = {}
+        add_field = {}
+        dict1['name'] = 'color_name'
+        dict1['type'] = 'text_general'
+        dict1['stored'] = True
+        fieldList.append(dict1)
+        dict1 = {}
+        dict1['name'] = 'animal_name'
+        dict1['type'] = 'text_general'
+        dict1['stored'] = True
+
+        add_field['add-field'] = dict1
+        print("Filed list")
+        print(dict1)
+        import json
+        json_object = json.dumps(add_field)   
+        print(json_object)
+    
+        response = requests.request("POST", url, headers=headers, data = json_object)
+
+        # print(response.text.encode('utf8'))
+        return response
+        # return 0
+        # print(response.text.encode('utf8'))
+
+def createBulkField():
     import requests
+
+    # url = "http://localhost:8983/solr/gettingstarted/schema"
+    url = "http://localhost:8983/solr/dataFromClient/schema"
+
+    payload = "{'add-field':[{'name': 'shelf','type': 'text_general','stored': true},{'name': 'location','type': 'text_general','stored': true}]}"
     headers = {
-    'Content-type': 'application/json',
+    'Content-type': 'application/json'
     }
-    solr_url = settings.SOLR_BASE_URL + settings.SOLR_CORE
-    schemaUrl = solr_url + "/schema"
-    data22 = {
-        "add-field":
-        [
+    print("Created Bulf Filed")
+    response = requests.request("POST", url, headers=headers, data = payload)
+
+    print(response.text.encode('utf8'))
+    return response
+
+
+
+def addField():
+    print("Add Field")
+    solr = SolrClient(settings.SOLR_BASE_URL)
+    # field = {'name':'khanAge','stored':True,'indexed':True,'type':'pfloat'}
+    field = {
+            "name":"NameX","type":"text_general","multiValued":False,"stored":True
+        }
+    # field = getPrepareData()
+   
+    response = solr.schema.create_field(settings.SOLR_CORE, field)
+    return response
+
+def getPrepareData():
+    
+        return [
         {
             "name":"Name","type":"text_general","multiValued":False,"stored":True
         },
@@ -180,24 +289,16 @@ def addField():
             "name":"Fare","type":"pfloat","default":0.0,"multiValued":False,"stored":True
         },
         ]
-    }
-    data = {
-        "add-field":
-        {
-            "name":"Sex22","type":"text_general","multiValued":"false","stored":"true"
-        }
-    }
-    # response = requests.post(schemaUrl, headers=headers, data=data)
-    # response = requests.post('http://localhost:8983/solr/gettingstarted/schema', headers=headers, data=data)
-    response = requests.post('http://localhost:8983/solr/dataFromClient/schema', headers=headers, data=data)
+"""
+Get the entire schema in JSON.
+"""
+def showSchema(schemaUrl, requests):
+    # url1 = 'http://localhost:8983/solr/dataFromClient/schema'
+    print("Schema Function")
+    print(schemaUrl)
+    response = requests.get(schemaUrl) # It return response.status_code) and response.content
+    return response
 
-    print("==================response================")
-    print(response)
-    print("==========================Response End==================")
-
-    # Now Add CopyField for searching all document columns
-    # copyData = {"add-copy-field" : {"source":"*","dest":"_text_"}}
-    # response = requests.post(schemaUrl, headers=headers, data=copyData)
 
 
 

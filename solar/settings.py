@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'titanic'
+    'titanic',
+    'solrClient',
 ]
 
 MIDDLEWARE = [
@@ -130,6 +131,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media/') # Path where we want to store outr 
 
 #========================Solr Configuration=====================
 SOLR_BASE_URL = 'http://localhost:8983/solr/'
-# SOLR_CORE = 'solrTitanic' # Core or Collection name
+SOLR_CORE = 'solrTitanic' # Core or Collection name
 # SOLR_CORE = 'titanic10' # Core or Collection name
-SOLR_CORE = 'dataFromClient' # Core or Collection name
+# SOLR_CORE = 'dataFromClient' # Core or Collection name

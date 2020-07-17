@@ -8,5 +8,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('solar/<str:rowId>', views.solrDelete, name='delete'),
     path('save', views.save, name='solr-add'),
-     path('migrate', views.migrate, name='migrate'),
+    path('migrate', views.migrate, name='migrate'),
+    path('create-schema', views.createSchema, name='create-schema'),
+    
 ]
