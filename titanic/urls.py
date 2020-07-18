@@ -10,5 +10,15 @@ urlpatterns = [
     path('save', views.save, name='solr-add'),
     path('migrate', views.migrate, name='migrate'),
     path('create-schema', views.createSchema, name='create-schema'),
+    path('schema', views.getEntireSchema, name='schema'),
+    path('field-list', views.fieldList, name='field_list'),
+    path('dynamic-field-list', views.dynamicFieldList, name='dynamic_list'),
+    path('copy-field-list', views.copyFieldList, name='copy_list'),
+    path('schema-name', views.schemaName, name='schema_name'),
+    path('collection', views.cloudCollection, name='collection'),
+    path('create-collection', views.createCollection, name='create-collection'),
+    path('delete-collection/<str:name>', views.deleteCollection, name='delete-collection'),
+    
+    
     
 ]

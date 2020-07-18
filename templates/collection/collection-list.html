@@ -1,0 +1,128 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block mainBody%}
+
+
+  <!-- /.card-header -->
+  <div class="card-body" style="display: none" id = "saveDataId">
+    <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Create a new collection</h3>
+    </div>
+
+    <form role="form" action="{% url 'create-collection' %}" method="POST">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- text input -->
+          <div class="form-group">
+            <label>Collection Name</label>
+            <input type="text" class="form-control" name = "name" placeholder="Collectiin name">
+           
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>NUmber of Shard</label>
+            <select class="form-control" name = 'nshard'>
+              <option>2</option>
+              <option>3</option>
+            </select>
+            <span>The number of shards to be created as part of the collection.</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- textarea -->
+          <div class="form-group">
+            <label>Shard Name</label>
+            <input type="text" class="form-control" name = "shard_name" placeholder="shard1,shard2">
+            <span> comma separated list of shard names, e.g., shard-x,shard-y,shard-z.</span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Replica</label>
+            <select class="form-control" name = 'replica'>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+              </select>
+              <span>The number of replicas to be created for each shard. The default is 1.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+  </div>
+  <!-- /.card-body -->
+
+<div class="card-body">
+ 
+  <div class="card card-secondary">
+  <div class="card-header">
+    <h3 class="card-title">Titanic Data</h3>
+  </div>
+  </div>
+  <table id="example1" class="table table-bordered table-hover">
+    <thead>
+    <tr>
+      <!-- <th>ID</th> -->
+      <th>Name</th>
+      <th>Trash</th>
+    </tr>
+    </thead>
+    <tbody>
+      {% for row in collections %}
+      <tr>
+        <!-- <th scope="row">{{row.id}}</th> -->
+        <th scope="row">{{row}}</th>
+        <td><a href= {% url 'delete-collection' row %}>
+          Delete
+        </a></td>
+        
+      </tr>
+      {% endfor %}
+  </table>
+
+ 
+</div>
+
+
+{% endblock %}
+
+{% block jsScript%}
+<script src="{% static  "plugins/datatables/jquery.dataTables.js" %}"></script>
+<script src="{% static  "plugins/datatables-bs4/js/dataTables.bootstrap4.js" %}"></script>
+<script>
+
+  $(function () {
+    
+   
+    $('#example1').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": false,
+      "info": true,
+      "autoWidth": false,
+      "pageLength": 20
+    });
+    
+
+    $('input[type=radio]').on('change', function() {
+    $(this).closest("form").submit();
+});
+
+  });
+  
+ 
+</script>
+
+{% endblock %}

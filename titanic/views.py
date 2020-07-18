@@ -10,12 +10,14 @@ from django.contrib import messages
 import pysolr
 from SolrClient import SolrClient
 from titanic.solrSchema import SolrSchema,SolrCollection
+from titanic import commonUtilities
+import json 
 
 """
 This function is for initiatiing solr instance
 """
-def solrInitialization():
-    solr_url = settings.SOLR_BASE_URL + settings.SOLR_CORE
+def solrInitialization(collectionName):
+    solr_url = settings.SOLR_BASE_URL + collectionName
     #connect to Solr Apache: # Create a client instance. The timeout and authentication options are not required.
     solr = pysolr.Solr(solr_url , always_commit=True,)
     return solr
@@ -29,7 +31,7 @@ def home(request):
 
    # Create a client instance. The timeout and authentication options are not required.
     # solr = pysolr.Solr('http://localhost:8983/solr/solrTrain', always_commit=True,)
-    solr = solrInitialization()
+    solr = solrInitialization(settings.SOLR_CORE)
     # Note that auto_commit defaults to False for performance. You can set
     # `auto_commit=True` to have commands always update the index immediately, make
     # an update call with `commit=True`, or use Solr's `autoCommit` / `commitWithin`
@@ -59,11 +61,17 @@ def home(request):
 
     
 
-"""
-Format data so that we can use in web page
-"""
-def setData(results):
 
+def setData(results):
+    """
+        This function formates data so that we can use in web page
+        Parameter:
+        results(List):List of Dictionary
+       
+        Returns: 
+        List:     List of Dictionary
+
+    """
     records = {}
     retailList = []
     titanicList = []
@@ -97,11 +105,15 @@ def setData(results):
     return records
 
 
-"""
-Remove Record From Solr Apache
-"""
+
 def solrDelete(request,rowId):
-    solr = solrInitialization()
+    """
+        This function is used to delete a row from a document
+        Parameter:
+        rowId(str): Unique Id of a row
+
+    """
+    solr = solrInitialization(settings.SOLR_CORE)
     solr.delete(id = rowId)
     # also in batches...
     #solr.delete(id=['doc_1', 'doc_2'])
@@ -113,7 +125,14 @@ def solrDelete(request,rowId):
 Save new record to Solr Apache
 """
 def save(request):
-    solr = solrInitialization()
+    """
+        This function Saves new record to Solr Apache
+        Parameter:
+        request(request Object): Holds various params
+        Method: POST
+
+    """
+    solr = solrInitialization(settings.SOLR_CORE)
     data = {}
     data['Name']= request.POST.get('name','Blank')
     data['Sex']= request.POST.get('sex','male')
@@ -128,7 +147,6 @@ def save(request):
 
 
 def migrate(request):
-    
     import pandas as pd
     filePath = settings.BASE_DIR + "/solrTrain.csv"
     data = pd.read_csv(filePath)
@@ -145,11 +163,13 @@ def migrate(request):
         row['Embarked'] = result[5]
         titanicData.append(row)
 
-    solr = solrInitialization() # Initiate Core Instance
+    solr = solrInitialization('Garden') # Initiate Core Instance
+    #connect to Solr Apache: # Create a client instance. The timeout and authentication options are not required.
     # First remove All Data then index it
     # solr.delete(q='*:*')
-    addField()
-    # solr.add(titanicData)
+    print("=================Migrate Data=============")
+    # print(titanicData)
+    solr.add(titanicData)
    
     return redirect('home')   
 
@@ -158,8 +178,30 @@ def migrate(request):
 def createSchema(request):
     import json 
     dict1 = {}
+    # Create Collection
+    print("Create New Collection")
+    colc = SolrCollection(settings.SOLR_BASE_URL)
+    # response = colc.createCollection(name = 'freshCollection',numShards = 2,shards = 'shared101,shared102')
+     # response = colc.reloadCollection(name = 'khanCloud')
+    
+    # After Creating Collectiion Create Schema
+    
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL,'freshCollection')
+    # schemaData = getPrepareData()
+    # response = solrSchema.addFields(schemaData)
+    response = solrSchema.getFieldLists()
+    print("=============================Response================================")
+    print(json.loads(response.content))
+
+    print("==========================Response End==================") #getPrepareData
+    return redirect('home')  
+
+
+def createSchema2(request):
+    import json 
+    dict1 = {}
     solrSchema = SolrSchema(settings.SOLR_BASE_URL, settings.SOLR_CORE)
-    print("===================Create Schema==============")
+    # print("===================Create Schema==============")
     # response = createField() #createField()
     # print("==================Add Fields================")
     # fields = {'name':'mango30','type':'text_general','stored':True}
@@ -192,8 +234,8 @@ def createSchema(request):
     # response = colc.renameCollection(name='khanCloud',target='shipCloude')
     # response = colc.renameCollection.__doc__ 
     # response = solrSchema.addFields.__doc__ 
-    help(SolrSchema) # # to access Class docstring 
-    help(SolrSchema.addFields) # # to access Class docstring 
+    # help(SolrSchema) # # to access Class docstring 
+    # help(SolrSchema.addFields) # # to access Class docstring 
     
     # print((response))
     # print(response.content)
@@ -237,35 +279,194 @@ def createField():
         # return 0
         # print(response.text.encode('utf8'))
 
-def createBulkField():
-    import requests
-
-    # url = "http://localhost:8983/solr/gettingstarted/schema"
-    url = "http://localhost:8983/solr/dataFromClient/schema"
-
-    payload = "{'add-field':[{'name': 'shelf','type': 'text_general','stored': true},{'name': 'location','type': 'text_general','stored': true}]}"
-    headers = {
-    'Content-type': 'application/json'
-    }
-    print("Created Bulf Filed")
-    response = requests.request("POST", url, headers=headers, data = payload)
-
-    print(response.text.encode('utf8'))
-    return response
 
 
+def getEntireSchema(request):
+    """
+        This function return entire schema of a collection
+        Parameter:
+        request(object):Http request parameter which hold query params
+        Method :      Get
+        Returns: 
+        jsonObject:     Return a json response.
 
-def addField():
-    print("Add Field")
-    solr = SolrClient(settings.SOLR_BASE_URL)
-    # field = {'name':'khanAge','stored':True,'indexed':True,'type':'pfloat'}
-    field = {
-            "name":"NameX","type":"text_general","multiValued":False,"stored":True
-        }
-    # field = getPrepareData()
+    """
+    contex = {}
+    print("Get Entire Eschema")
+    format = request.GET.get('wt',None)
+    formatType = 'json' if request.GET.get('wt',None) == None else request.GET.get('wt')
+    collectionName = 'freshCollection' if request.GET.get('collection',None) == None else request.GET.get('collection')
    
-    response = solr.schema.create_field(settings.SOLR_CORE, field)
-    return response
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL,collectionName)
+    response = solrSchema.getEntrireSchema(wt = formatType)
+    contex['response'] = response
+    contex['collections']= collectionLists()
+    contex['default_collection']= 'freshCollection'
+    
+    return render(request, 'schema/schema.html', contex)
+
+def collectionLists():
+    """
+        This function return a collection from cloude Server
+        Parameter:
+        
+        Returns: 
+        List :    List of Collection
+
+    """
+    colc = SolrCollection(settings.SOLR_BASE_URL)
+    response = colc.getCollectionList()
+    status= response['responseHeader']
+    if status['status'] == 0:
+        return response['collections']
+    else:
+        return ['error']
+     
+
+def fieldList(request):
+    """
+        This function return field List of a collection
+        Parameter:
+        request(object):Http request parameter which hold query params
+        Method :      Get
+        Returns: 
+        jsonObject:     Return a json response.
+
+    """
+    context = {}
+    collectionName = 'freshCollection' if request.GET.get('collection',None) == None else request.GET.get('collection')
+    formatType = 'json' if request.GET.get('wt',None) == None else request.GET.get('wt')
+    filedName = '' if request.GET.get('field',None) == None or request.GET.get('field') == '0' else request.GET.get('field')
+    print("=================Field Name============")
+    print(filedName)
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL,collectionName)
+    response = solrSchema.getFieldLists(fieldName =filedName, wt = formatType)
+    context['response'] = response
+    context['collections']= collectionLists()
+    context['fields']= commonUtilities.sampleFields()
+    return render(request, 'schema/field-list.html', context)
+
+def dynamicFieldList(request):
+    """
+        This function return Dynamic field List of a collection
+        Parameter:
+        request(object):Http request parameter which hold query params
+        Method :      Get
+        Returns: 
+        JsonObject:     Return a json response.
+
+    """
+    context = {}
+    collectionName = 'freshCollection' if request.GET.get('collection',None) == None else request.GET.get('collection')
+    formatType = 'json' if request.GET.get('wt',None) == None else request.GET.get('wt')
+    filedName = '' if request.GET.get('field',None) == None or request.GET.get('field') == '0' else request.GET.get('field')
+    print("=================Dynamic Field Name============")
+    print(filedName)
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL,collectionName)
+    response = solrSchema.getDynamicFieldLists(fieldName =filedName, wt = formatType)
+    context['response'] = response
+    context['collections']= collectionLists()
+    context['fields']= commonUtilities.sampleDynamicFields()
+    return render(request, 'schema/dynamic-list.html', context)
+
+def copyFieldList(request):
+    """
+        This function return Copy field List of a collection
+        Parameter:
+        request(object):Http request parameter which hold query params
+        Method :      Get
+        Returns: 
+        jsonObject:     Return a json response.
+
+    """
+    context = {}
+    collectionName = 'freshCollection' if request.GET.get('collection',None) == None else request.GET.get('collection')
+    formatType = 'json' if request.GET.get('wt',None) == None else request.GET.get('wt')
+    filedName = '' if request.GET.get('field',None) == None or request.GET.get('field') == '0' else request.GET.get('field')
+   
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL,collectionName)
+    response = solrSchema.getCopyFields(wt = formatType)
+    context['response'] = response
+    context['collections']= collectionLists()
+    return render(request, 'schema/copy-list.html', context)
+
+def schemaName(request):
+    """
+        This function return Schema name of a collection
+        Parameter:
+        request(object):Http request parameter which hold query params
+        Method :      Get
+        Returns: 
+        jsonObject:     Return a json response.
+
+    """
+    context = {}
+    collectionName = 'freshCollection' if request.GET.get('collection',None) == None else request.GET.get('collection')
+    formatType = 'json' if request.GET.get('wt',None) == None else request.GET.get('wt')
+
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL,collectionName)
+    response = solrSchema.getSchemaName(wt = formatType)
+    context['response'] = response
+    context['collections']= collectionLists()
+    return render(request, 'schema/schema_name.html', context)
+
+
+def cloudCollection(request):
+    """
+        This function return list of collection
+        Parameter:
+        request(object):Http request parameter which hold query params
+        Method :      Get
+        Returns: 
+        Dictionary:     Return a dictionary response.
+
+    """
+    context = {}
+    context['collections']= collectionLists()
+    return render(request, 'collection/collection-list.html', context)
+
+def createCollection(request):
+    """
+        This function is used to create collection
+        Parameter:
+
+        name    :   Collection name
+        nshard  :   Number of Shards
+        shard_name :    Shard names
+        replica    :    Number of replicas
+
+        Method :      PoST
+
+    """
+    colc = SolrCollection(settings.SOLR_BASE_URL)
+    c_name= request.POST.get('name')
+    c_numShards= request.POST.get('nshard')
+    c_shards= request.POST.get('shard_name')
+    c_replicationFactor = request.POST.get('replica')
+    
+    response = colc.createCollection(name = c_name,numShards = c_numShards,shards = c_shards,replicationFactor = c_replicationFactor)
+    messages.add_message(request, messages.SUCCESS, 'New Collection created')
+    
+    status= response['responseHeader']
+    if status['status'] == 0:
+         messages.add_message(request, messages.SUCCESS, 'New Collection created')
+    else:
+         messages.add_message(request, messages.ERROR, 'Error Occure')
+    return redirect('collection')
+
+def deleteCollection(request,name):
+    """
+        This function is used to delete a collection
+        Parameter:
+        name    :   Collection name
+        Method :      GET
+
+    """
+    colc = SolrCollection(settings.SOLR_BASE_URL)
+    response = colc.deleteCollection(name)
+    return redirect('collection')
+   
+
 
 def getPrepareData():
     
@@ -283,23 +484,12 @@ def getPrepareData():
             "name":"Embarked","type":"text_general","multiValued":False,"stored":True
         },
          {
-            "name":"Age","type":"pfloat","default":0.0,"multiValued":False,"stored":True
+            "name":"Age","type":"text_general","default":'0',"multiValued":False,"stored":True
         },
         {
-            "name":"Fare","type":"pfloat","default":0.0,"multiValued":False,"stored":True
+            "name":"Fare","type":"text_general","default":'0',"multiValued":False,"stored":True
         },
         ]
-"""
-Get the entire schema in JSON.
-"""
-def showSchema(schemaUrl, requests):
-    # url1 = 'http://localhost:8983/solr/dataFromClient/schema'
-    print("Schema Function")
-    print(schemaUrl)
-    response = requests.get(schemaUrl) # It return response.status_code) and response.content
-    return response
-
-
 
 
 

@@ -1,0 +1,84 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block mainBody%}
+
+
+  <!-- /.card-header -->
+  <!-- <div class="card-body" style="display: none" id = "saveDataId"> -->
+    <div class="card-body">
+    <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Display Schema of Collection/Core</h3>
+    </div>
+
+    <form role="form" action="{% url 'schema' %}" method="GET">
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- text input -->
+          <div class="form-group">
+            <label>Collection Name</label>
+            <select class="form-control" name = 'collection' id ="collectionId">
+                {% for collec in collections %}
+                <option {% if request.GET.collection == default_collection %} selected {% endif %}>{{collec}}</option>
+                {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Format(wt)</label>
+            <select class="form-control" name = 'wt' id ="formatType">
+              <option {% if request.GET.wt == "json" %} selected {% endif %}>json</option>
+              <option {% if request.GET.wt == "xml" %} selected {% endif %}>xml</option>
+              <option {% if request.GET.wt == "schema.xml" %} selected {% endif %}>schema.xml</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  </div>
+  <!-- /.card-body -->
+
+  <div class="card-body">
+    <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Output</h3>
+    </div>
+   
+      <div class="row">
+        <div class="col-sm-12">
+          <!-- text input -->
+          <div class="form-group">
+           
+            <textarea name="" id="" cols="180" rows="30">{{ response }}</textarea>
+          </div>
+        </div>
+        
+      </div>
+     
+  </div>
+  </div>
+
+{% endblock %}
+
+{% block jsScript%}
+
+
+<script>    
+    $(document).ready(function() {
+
+  $('#formatType').on('change', function() {
+    $(this).closest("form").submit();
+  });
+
+  $('#collectionId').on('change', function() {
+    $(this).closest("form").submit();
+  });
+});
+ 
+
+</script>
+
+{% endblock %}

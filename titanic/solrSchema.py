@@ -2,6 +2,11 @@ import json
 import requests
 import urllib
 
+
+# response = solrSchema.addFields.__doc__ 
+# help(SolrSchema) # # to access Class docstring 
+#help(SolrSchema.addFields) # # to access Class docstring 
+    
 class SolrSchema:
     """ 
     This is a class for executing operation on Solr SChema.
@@ -53,6 +58,7 @@ class SolrSchema:
         if not dictionaryData:
             return self.displayMessage(self.errorCode,'Data is empty')
 
+        print("Create New Schema Fields")
         self.field['add-field'] = dictionaryData
         payload = json.dumps(self.field)  
         print(payload)
@@ -153,17 +159,27 @@ class SolrSchema:
         response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
         return response
 
-    def retrieveEntrireSchema(self, wt = 'json'):
+    def getEntrireSchema(self, wt = 'json'):
         """
         This function is used to get entire schema of a collection/core.
         Parameters:
         wt(string) :    return type(json,xml,schema.xml)
 
         Returns: 
-            JsonObject/Xml/schema.xml: return a json/xml as per wt parameter.
+                    JsonObject/Xml/schema.xml: The Response will include all fields, field types, dynamic rules and copy field rules, i
+                    n the format requested (JSON or XML). The schema name and version are also included.
         """
-        response = requests.request("Get", self.fullUrl)
-        return response
+        args = {}
+        args['wt'] = wt
+        response = requests.request("Get", self.fullUrl + "?{}".format(urllib.parse.urlencode(args)))
+        if wt == 'json':
+            jsonData = json.loads(response.content)
+            return jsonData
+        else:
+            return response.content
+
+       
+        
 
     
     def getFieldLists(self, fieldName = '',wt = 'json', fl = '',includeDynamic = 'false', showDefaults = 'false'):
@@ -193,7 +209,7 @@ class SolrSchema:
         else:
             response = requests.request("Get", self.fullUrl + "/fields/"+fieldName)
 
-        return response
+        return self.returnResponse(wt,response)
 
     
     def getDynamicFieldLists(self, fieldName = '',wt = 'json',showDefaults='false'):
@@ -216,7 +232,7 @@ class SolrSchema:
             response = requests.request("Get", self.fullUrl + "/dynamicfields?{}".format(urllib.parse.urlencode(args)))
         else:
             response = requests.request("Get", self.fullUrl + "/dynamicfields/"+fieldName)
-        return response
+        return  self.returnResponse(wt,response)
 
    
     def getCopyFields(self,wt = 'json',sourceFl = '',destinationFl = ''):
@@ -238,7 +254,7 @@ class SolrSchema:
             args['source.fl'] = sourceFl
             args['dest.fl'] = destinationFl
         response = requests.request("Get", self.fullUrl + "/copyfields?{}".format(urllib.parse.urlencode(args)))
-        return response
+        return  self.returnResponse(wt,response)
     
     
     def getSchemaName(self, wt = 'json'):
@@ -254,7 +270,7 @@ class SolrSchema:
         """
         args = {"wt": wt}
         response = requests.request("Get", self.fullUrl + "/name?{}".format(urllib.parse.urlencode(args)))
-        return response
+        return  self.returnResponse(wt,response)
 
     
     def displayMessage(self,erroCode, message):
@@ -269,6 +285,22 @@ class SolrSchema:
         self.response['status'] = erroCode
         self.response['message'] = message
         return self.response
+
+    def returnResponse(self,wt, response):
+        """
+        This function is used to set respons format.
+        Parameters:
+        wt :     wt defines response format.
+        response:  This is a Solr response data
+        Return:
+        JsonObject :  Return json object/Dictinary
+
+        """
+        if wt == 'json':
+            jsonData = json.loads(response.content)
+            return jsonData
+        else:
+            return response.content
 
 
 class SolrCollection:
@@ -288,7 +320,7 @@ class SolrCollection:
         """
         args = {"action": 'CREATE','name':name,'numShards':numShards,'shards':shards,'replicationFactor':replicationFactor,'wt':wt}
         response = requests.request("Get", self.fullUrl + "?{}".format(urllib.parse.urlencode(args)))
-        return response
+        return self.returnResponse(wt = 'json', response = response)
 
     def reloadCollection(self, name, wt = 'json'):
         """
@@ -313,7 +345,7 @@ class SolrCollection:
 
         args = {"action": 'LIST'}
         response = requests.request("Get", self.fullUrl + "?{}".format(urllib.parse.urlencode(args)))
-        return response
+        return self.returnResponse(wt = 'json', response = response)
 
     def renameCollection(self,name, target ):
         """
@@ -350,6 +382,23 @@ class SolrCollection:
         """
         args = {"action": 'DELETE','name':name,'wt':wt}
         response = requests.request("Get", self.fullUrl + "?{}".format(urllib.parse.urlencode(args)))
-        return response
+        return self.returnResponse(wt = 'json', response = response)
+
+    
+    def returnResponse(self,wt, response):
+        """
+        This function is used to set respons format.
+        Parameters:
+        wt :     wt defines response format.
+        response:  This is a Solr response data
+        Return:
+        JsonObject :  Return json object/Dictinary
+
+        """
+        if wt == 'json':
+            jsonData = json.loads(response.content)
+            return jsonData
+        else:
+            return response.content
 
     

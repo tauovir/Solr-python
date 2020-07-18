@@ -262,17 +262,62 @@
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
               <p>
-                Solr Client Package
+                Schema Operation
                 <i class="fas fa-angle-left right"></i>
               </p>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="{% url 'solrclient-home' %}" class="nav-link">
+                <a href="{% url 'schema' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Home</p>
+                  <p>Entire Schema</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="{% url 'field_list' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Field List</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'dynamic_list' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Dynamic Field List</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'copy_list' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Copy Field List</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'schema_name' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Schema Name</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+         
+
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                Collection Operation
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'collection' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Collection</p>
+                </a>
+              </li>
+              
+             
             </ul>
           </li>
          
@@ -294,6 +339,9 @@
             {% for message in messages %}
             {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
             <span class="success-message">{{ message }}</span>
+            {% endif %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+            <span class="alert-message">{{ message }}</span>
             {% endif %}
             {% endfor %}
           </div><!-- /.col -->
