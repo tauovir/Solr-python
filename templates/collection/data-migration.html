@@ -4,7 +4,80 @@
 {% block mainBody%}
 
 
-  
+  <!-- /.card-header -->
+  <div class="card-body" style="display: none" id = "saveDataId">
+    <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Migrate Data</h3>
+    </div>
+
+    <form role="form" action="{% url 'make-migration' %}" method="POST">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- text input -->
+          <div class="form-group">
+            <label>Choose Collection</label>
+            <select class="form-control" name = 'collection' id ="collectionId">
+              {% for collec in collections %}
+              <option {% if request.GET.collection == collec %} selected {% endif %}>{{collec}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Choose Dataset</label>
+            <select class="form-control" name = 'name' id ="datasetId">
+              {% for collec in available %}
+              <option {% if request.GET.name == collec %} selected {% endif %}>{{collec}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- textarea -->
+          <div class="form-group">
+            <label>Add Field Types ?</label>
+            <select class="form-control" name = 'fieldTypes'>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Add Field Fields</label>
+            <select class="form-control" name = 'fields'>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6">
+          <!-- textarea -->
+          <div class="form-group">
+            <label>Add Copy Fields?</label>
+            <select class="form-control" name = 'copyFields'>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+        </div>
+        
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+  </div>
+  <!-- /.card-body -->
 
 <div class="card-body">
   <div class="card card-secondary">

@@ -177,7 +177,8 @@ class SolrSchema:
         payload = json.dumps(self.field)  
         print("Add Field Types")
         response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
-        return self.returnResponse('json',response)
+        # return self.returnResponse('json',response)
+        return response
     
     def deleteFieldType(self,fieldName):
         """

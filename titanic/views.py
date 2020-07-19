@@ -152,7 +152,7 @@ def dataMigration(request):
     titanicData = []
     salesData =[]
     name= request.GET.get('name')
-    print("================")
+    print("================") 
     print(name)
     if name =='Sales':
         salesData = commonUtilities.getSalesData()
@@ -160,11 +160,67 @@ def dataMigration(request):
         retailData = commonUtilities.getReatailData()
     else:
         titanicData = commonUtilities.titanicData()
-    context = {'titanicData' : titanicData,'retailData':retailData,'salesData':salesData,'available':availableData}
+    context = {'titanicData' : titanicData,'retailData':retailData,'salesData':salesData,'available':availableData,'collections':collectionLists()}
     return render(request, 'collection/data-migration.html', context)
 
 
+def makeMigration(request):
+    collectionName = request.POST.get('collection')
+    datasetName = request.POST.get('name')
+    fieldTypes = request.POST.get('fieldTypes')
+    fields = request.POST.get('fields')
+    copyFields = request.POST.get('copyFields')
+    preDefinedFields = {'Sales':commonUtilities.getSalesFields(),'Retail':commonUtilities.getRetailFields(),'Titanic':commonUtilities.getTitanicFields()}
+    print("=======================Make Migration====================")
+    print("Collection Name:",collectionName)
+    print("Dataset Name:",datasetName)
+    print("fieldTypes:",fieldTypes)
+    print("fields:",fields)
+    print("copyFields:",copyFields)
+    commonUtilities.writeLog("khannsnsnsn")
+    commonUtilities.writeLog("\n")
+    commonUtilities.writeLog("mmmmmmmmmmmmmmmmmmmmm")
+    
+    
+    # Initialize Schema Instance
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL,collectionName)
+    
+    if int(fieldTypes) == 1: # Add Field Types
+        print("Add Types")
+        allFieldType = commonUtilities.getAllFieldsTypes()
+        # response = solrSchema.addFieldType(allFieldType)
+        commonUtilities.writeLog("\n =================Field Types Addes====================\n")
+        # commonUtilities.writeLog(response.content)
+       
+
+    if int(fields) == 1:
+        print("Add Field")
+        fields_schema = preDefinedFields[datasetName]
+        # response = solrSchema.addFields(fields_schema)
+        commonUtilities.writeLog("\n =================Field  Addes====================\n")
+        # commonUtilities.writeLog(response.content)
+
+    if int(copyFields) == 1:
+        print("Add Copy")
+        copyField = commonUtilities.sampleCopyFields()
+        # response = solrSchema.addCopyField(copyField)
+        commonUtilities.writeLog("\n =================Add add Copy fields====================\n")
+        # commonUtilities.writeLog(response.content)
+    #====================Now Add Index using pySolr pacakege==============
+    solr = solrInitialization(collectionName) # Initiate Core Instance
+    dataset = commonUtilities.getSalesData() if datasetName == 'Sales' else commonUtilities.getReatailData() if datasetName =='Retail'  else commonUtilities.titanicData()
+    print(dataset)
+    print("===========",collectionName)
+    solr.add(dataset)
+    return redirect('data-migration')   
+
+
 def migrate(request):
+
+    colc = SolrCollection(settings.SOLR_BASE_URL)
+    response = colc.reloadCollection('MangoOrg')
+    print(response.content)
+
     import pandas as pd
     filePath = settings.BASE_DIR + "/solrTrain.csv"
     data = pd.read_csv(filePath)
@@ -181,13 +237,13 @@ def migrate(request):
         row['Embarked'] = result[5]
         titanicData.append(row)
 
-    solr = solrInitialization('Garden') # Initiate Core Instance
+    solr = solrInitialization('MangoOrg') # Initiate Core Instance
     #connect to Solr Apache: # Create a client instance. The timeout and authentication options are not required.
     # First remove All Data then index it
     # solr.delete(q='*:*')
     print("=================Migrate Data=============")
-    # print(titanicData)
-    solr.add(titanicData)
+    print(row)
+    solr.add(row)
    
     return redirect('home')   
 
@@ -452,10 +508,7 @@ def cloudCollection(request):
     # response = solrSchema.addFieldType(list1)
     # # response = solrSchema.deleteFieldType('nzText')
     # print(response)
-    #=============================data Generation=====================
-   
-
-    #=======================================
+  
     return render(request, 'collection/collection-list.html', context)
 
 def createCollection(request):

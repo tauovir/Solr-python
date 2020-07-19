@@ -11,6 +11,11 @@ def sampleDynamicFields():
     list1 = ['*_d','*_ss','*__str']
     return list1
 
+def sampleCopyFields():
+    copyField = {}
+    copyField['source'] = '*_t' # the following line will copy the contents of all incoming fields that match the wildcard pattern *_t to the text field
+    copyField['dest'] = 'location'
+    return copyField
 
 def sampleFieldTypesFloat():
     fieldType = {}
@@ -18,7 +23,27 @@ def sampleFieldTypesFloat():
     fieldType['class'] = 'solr.FloatPointField'
     fieldType['docValues'] = 'true'
     fieldType['multiValued'] = 'false'
+    fieldType['stored'] = 'true'
+    fieldType['indexed'] = 'false'
+    return fieldType
+
+def sampleFieldTypesFloat2():
+    fieldType = {}
+    fieldType['name'] = 'nzfloat2'
+    fieldType['class'] = 'solr.FloatPointField'
+    fieldType['docValues'] = 'true'
+    fieldType['multiValued'] = 'false'
     fieldType['stored'] = 'false'
+    fieldType['indexed'] = 'false'
+    return fieldType
+
+def sampleFieldTypeInt():
+    fieldType = {}
+    fieldType['name'] = 'nzint'
+    fieldType['class'] = 'solr.IntPointField'
+    fieldType['docValues'] = 'true'
+    fieldType['multiValued'] = 'false'
+    fieldType['stored'] = 'true'
     fieldType['indexed'] = 'false'
     return fieldType
 
@@ -44,6 +69,22 @@ def sampleFieldTypesText():
     fieldType['queryAnalyzer'] = indexAnalyser
 
     return fieldType
+
+def getAllFieldsTypes():
+    allFieldTypes = []
+    text = sampleFieldTypesText()
+    float1 = sampleFieldTypesFloat()
+    float2 = sampleFieldTypesFloat2()
+    int1 = sampleFieldTypeInt()
+    allFieldTypes.append(text)
+    allFieldTypes.append(float1)
+    allFieldTypes.append(float2)
+    allFieldTypes.append(int1)
+
+    return allFieldTypes
+
+    
+   
 
     
 def getIndexFilterToken():
@@ -137,3 +178,93 @@ def titanicData():
         row['Embarked'] = result[5]
         titanicData.append(row)
     return titanicData[:51]
+
+
+def getTitanicFields():
+    
+        return [
+        {
+            "name":"Name","type":"text_general","multiValued":False,"stored":True
+        },
+        {
+            "name":"Sex","type":"text_general","multiValued":False,"stored":True
+        },
+         {
+            "name":"Cabin","type":"text_general","multiValued":False,"stored":True
+        },
+         {
+            "name":"Embarked","type":"text_general","multiValued":False,"stored":True
+        },
+         {
+            "name":"Age","type":"nzfloat","default":'0',"multiValued":False,"stored":True
+        },
+        {
+            "name":"Fare","type":"nzfloat2","default":'0',"multiValued":False,"stored":True
+        },
+        ]
+
+def getRetailFields():
+    
+        return [
+        {
+            "name":"InvoiceNo","type":"text_general","multiValued":False,"stored":True
+        },
+        {
+            "name":"StockCode","type":"text_general","multiValued":False,"stored":True
+        },
+         {
+            "name":"Description","type":"nzText","multiValued":False,"stored":True
+        },
+         {
+            "name":"Quantity","type":"nzint","multiValued":False,"stored":True
+        },
+         {
+            "name":"InvoiceDate","type":"text_general","multiValued":False,"stored":True
+        },
+        {
+            "name":"UnitPrice","type":"nzfloat2","default":'0',"multiValued":False,"stored":True
+        },
+        {
+            "name":"CustomerID","type":"nzint","multiValued":False,"stored":True
+        },
+        {
+            "name":"Country","type":"text_general","default":'0',"multiValued":False,"stored":True
+        },
+        ]
+
+def getSalesFields():
+        return [
+        {
+            "name":"area_type","type":"nzText","multiValued":False,"stored":True
+        },
+        {
+            "name":"availability","type":"text_general","multiValued":False,"stored":True
+        },
+         {
+            "name":"location","type":"text_general","multiValued":False,"stored":True
+        },
+         {
+            "name":"size","type":"nzText","multiValued":False,"stored":True
+        },
+         {
+            "name":"society","type":"text_general","multiValued":False,"stored":True
+        },
+        {
+            "name":"total_sqft","type":"text_general","default":'0',"multiValued":False,"stored":True
+        },
+        {
+            "name":"bath","type":"nzint","multiValued":False,"stored":True
+        },
+        {
+            "name":"balcony","type":"nzint","default":'0',"multiValued":False,"stored":True
+        },
+        {
+            "name":"price","type":"nzfloat","default":'0',"multiValued":False,"stored":True
+        },
+        ]
+
+def writeLog(data):
+    filePath = settings.BASE_DIR + "/titanic/logFile/log.txt"
+    file1 = open(filePath, 'a')  # append mode
+    file1.writelines(data) 
+    file1.close()  
