@@ -86,9 +86,7 @@ class SolrSchema:
         response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
         return response
 
-    """
-    
-    """
+   
     def replaceField(self,dictionaryData):
         """
         TThis function is used to replace the defination of previous field.We must supply the full definition 
@@ -158,6 +156,69 @@ class SolrSchema:
         print(payload)
         response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
         return response
+
+    def addFieldType(self,dictionaryData):
+        """
+        This function takes a dictionary or a list of dictionary to add field Type defination in the Solr Schema
+
+        Parameters:
+        dictionaryData(dict)/(List of dict) : add fields/ a field
+
+        Returns: 
+            JsonObject: return a json object.
+        """
+        # if not isinstance(dictionaryData, dict):
+        #     return self.displayMessage(self.errorCode,'Data type should be Dictinary')
+        if not dictionaryData:
+            return self.displayMessage(self.errorCode,'Data is empty')
+
+        print("Create New Schema FieldsTypes")
+        self.field['add-field-type'] = dictionaryData
+        payload = json.dumps(self.field)  
+        print("Add Field Types")
+        response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
+        return self.returnResponse('json',response)
+    
+    def deleteFieldType(self,fieldName):
+        """
+        This function is used to remove field type defination 
+
+        Parameters:
+        fieldName(string) : Field Name
+
+        Returns: 
+            JsonObject: return a json object.
+        """
+        dictionaryData = {}
+        if not fieldName:
+            return self.displayMessage(self.errorCode,'Field type required')
+        dictionaryData['name'] = fieldName
+        self.field['delete-field-type'] = dictionaryData
+        print("Delete Filed Type")
+        payload = json.dumps(self.field)  
+        response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
+        return self.returnResponse('json',response)
+    
+    def replaceFieldType(self,dictionaryData):
+        """
+        This function takes a dictionary to replace field Type definition in the Solr Schema
+
+        Parameters:
+        dictionaryData(dict)/(List of dict) : add fields/ a field
+
+        Returns: 
+            JsonObject: return a json object.
+        """
+        # if not isinstance(dictionaryData, dict):
+        #     return self.displayMessage(self.errorCode,'Data type should be Dictinary')
+        if not dictionaryData:
+            return self.displayMessage(self.errorCode,'Data is empty')
+
+        print("Replace FieldsTypes")
+        self.field['replace-field-type'] = dictionaryData
+        payload = json.dumps(self.field)  
+        response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
+        return self.returnResponse('json',response)
 
     def getEntrireSchema(self, wt = 'json'):
         """

@@ -423,6 +423,20 @@ def cloudCollection(request):
     """
     context = {}
     context['collections']= collectionLists()
+    #===============================
+    list1 = []
+    textFieldType = commonUtilities.sampleFieldTypesText()
+    floatFieldType = commonUtilities.sampleFieldTypesFloat()
+    list1.append(textFieldType)
+    list1.append(floatFieldType)
+    print(list1)
+    
+    # print(json.dumps(textFieldType))
+    solrSchema = SolrSchema(settings.SOLR_BASE_URL,'freshCollection')
+    response = solrSchema.addFieldType(list1)
+    # response = solrSchema.deleteFieldType('nzText')
+    print(response)
+    #=======================================
     return render(request, 'collection/collection-list.html', context)
 
 def createCollection(request):
