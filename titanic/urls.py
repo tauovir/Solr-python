@@ -18,6 +18,7 @@ urlpatterns = [
     path('collection', views.cloudCollection, name='collection'),
     path('create-collection', views.createCollection, name='create-collection'),
     path('delete-collection/<str:name>', views.deleteCollection, name='delete-collection'),
+    path('data-migration', views.dataMigration, name='data-migration'),
     
     
     

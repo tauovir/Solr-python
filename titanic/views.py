@@ -146,6 +146,24 @@ def save(request):
 
 
 
+def dataMigration(request):
+    availableData = ['Titanic','Sales','Retail']
+    retailData = []
+    titanicData = []
+    salesData =[]
+    name= request.GET.get('name')
+    print("================")
+    print(name)
+    if name =='Sales':
+        salesData = commonUtilities.getSalesData()
+    elif name =='Retail':
+        retailData = commonUtilities.getReatailData()
+    else:
+        titanicData = commonUtilities.titanicData()
+    context = {'titanicData' : titanicData,'retailData':retailData,'salesData':salesData,'available':availableData}
+    return render(request, 'collection/data-migration.html', context)
+
+
 def migrate(request):
     import pandas as pd
     filePath = settings.BASE_DIR + "/solrTrain.csv"
@@ -424,18 +442,19 @@ def cloudCollection(request):
     context = {}
     context['collections']= collectionLists()
     #===============================
-    list1 = []
-    textFieldType = commonUtilities.sampleFieldTypesText()
-    floatFieldType = commonUtilities.sampleFieldTypesFloat()
-    list1.append(textFieldType)
-    list1.append(floatFieldType)
-    print(list1)
-    
-    # print(json.dumps(textFieldType))
-    solrSchema = SolrSchema(settings.SOLR_BASE_URL,'freshCollection')
-    response = solrSchema.addFieldType(list1)
-    # response = solrSchema.deleteFieldType('nzText')
-    print(response)
+    # list1 = []
+    # textFieldType = commonUtilities.sampleFieldTypesText()
+    # floatFieldType = commonUtilities.sampleFieldTypesFloat()
+    # list1.append(textFieldType)
+    # list1.append(floatFieldType)
+    # print(list1)
+    # solrSchema = SolrSchema(settings.SOLR_BASE_URL,'freshCollection')
+    # response = solrSchema.addFieldType(list1)
+    # # response = solrSchema.deleteFieldType('nzText')
+    # print(response)
+    #=============================data Generation=====================
+   
+
     #=======================================
     return render(request, 'collection/collection-list.html', context)
 

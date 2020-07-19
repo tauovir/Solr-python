@@ -1,0 +1,202 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block mainBody%}
+
+
+  
+
+<div class="card-body">
+  <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Filters</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <form role="form" action="{% url 'data-migration' %}" method="GET">
+          <div class="row">
+            <div class="col-sm-6">
+              <!-- radio -->
+              <div class="form-group">
+                <div class="custom-control custom-radio">
+                 
+                    <label>Available Dataset</label>
+                  <select class="form-control" name = 'name' id ="dataId">
+                    {% for collec in available %}
+                    <option {% if request.GET.name == collec %} selected {% endif %}>{{collec}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              
+          </div>
+         
+        </form>
+      </div>
+    <!-- /.card-body -->
+  </div>
+  {% if titanicData %}
+  <div class="card card-secondary">
+  <div class="card-header">
+    <h3 class="card-title">Titanic Data</h3>
+  </div>
+  </div>
+  <table id="example1" class="table table-bordered table-hover">
+    <thead>
+    <tr>
+      <!-- <th>ID</th> -->
+      <th>Name</th>
+      <th>Sex</th>
+      <th>Age</th>
+      <th>Fare</th>
+      <th>Embark</th>
+      <th>Cabin</th>
+      
+    </tr>
+    </thead>
+    <tbody>
+      {% for row in titanicData %}
+      <tr>
+        <!-- <th scope="row">{{row.id}}</th> -->
+        <th scope="row">{{row.Name}}</th>
+        <td>{{row.Sex}}</td>
+        <td>{{row.Age}}</td>
+        <td>{{row.Fare}}</td>
+        <td>{{row.Embarked}}</td>
+        <td>{{row.Cabin}}</td>
+      </tr>
+      {% endfor %}
+  </table>
+  {% endif %}
+  {% if retailData %}
+  <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Retail Data</h3>
+    </div>
+    </div>
+  <table id="example2" class="table table-bordered table-hover">
+    <thead>
+    <tr>
+      <!-- <th>ID</th> -->
+      <th>InvoiceNo</th>
+      <th>StockCode</th>
+      <th>Description</th>
+      <th>Quantity</th>
+      <th>InvoiceDate</th>
+      <th>UnitPrice</th>
+      <th>CustomerID</th>
+      <th>Country</th>
+      
+    </tr>
+    </thead>
+    <tbody>
+      {% for row in retailData %}
+      <tr>
+        <!-- <th scope="row">{{row.id}}</th> -->
+        <th scope="row">{{row.InvoiceNo}}</th>
+        <td>{{row.StockCode}}</td>
+        <td>{{row.Description}}</td>
+        <td>{{row.Quantity}}</td>
+        <td>{{row.InvoiceDate}}</td>
+        <td>{{row.UnitPrice}}</td>
+        <td>{{row.CustomerID}}</td>
+        <td>{{row.Country}}</td>
+        
+        
+      </tr>
+      {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if salesData %}
+  <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Sales Data</h3>
+    </div>
+    </div>
+  <table id="example3" class="table table-bordered table-hover">
+    <thead>
+    <tr>
+      <!-- <th>ID</th> -->
+      <th>area_type</th>
+      <th>availability</th>
+      <th>location</th>
+      <th>size</th>
+      <th>society</th>
+      <th>total_sqft</th>
+      <th>bath</th>
+      <th>balcony</th>
+      <th>price</th>
+      
+    </tr>
+    </thead>
+    <tbody>
+      {% for row in salesData %}
+      <tr>
+        <!-- <th scope="row">{{row.id}}</th> -->
+        <th scope="row">{{row.area_type}}</th>
+        <td>{{row.availability}}</td>
+        <td>{{row.location}}</td>
+        <td>{{row.size}}</td>
+        <td>{{row.society}}</td>
+        <td>{{row.total_sqft}}</td>
+        <td>{{row.bath}}</td>
+        <td>{{row.balcony}}</td>
+        <td>{{row.price}}</td>
+        
+      </tr>
+      {% endfor %}
+  </table>
+{% endif %}
+  
+</div>
+
+
+{% endblock %}
+
+{% block jsScript%}
+<script src="{% static  "plugins/datatables/jquery.dataTables.js" %}"></script>
+<script src="{% static  "plugins/datatables-bs4/js/dataTables.bootstrap4.js" %}"></script>
+<script>
+
+  $(function () {
+    
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "pageLength": 20
+    });
+    $('#example1').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": false,
+      "info": true,
+      "autoWidth": false,
+      "pageLength": 20
+    });
+    $('#example3').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": false,
+      "info": true,
+      "autoWidth": false,
+      "pageLength": 20
+    });
+    
+
+    $('#dataId').on('change', function() {
+    $(this).closest("form").submit();
+  });
+  
+});
+
+
+ 
+</script>
+
+{% endblock %}
