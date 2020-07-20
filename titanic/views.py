@@ -56,7 +56,7 @@ def home(request):
     # results = solr.search('Sex:male and orange')
 
     records = setData(results)
-    context = {'titanicData' : records['titanic'],'retailData':records['retail']}
+    context = {'titanicData' : records['titanic'],'retailData':records['retail'],'saleData':records['sale']}
     return render(request, 'data.html', context)
 
     
@@ -75,6 +75,7 @@ def setData(results):
     records = {}
     retailList = []
     titanicList = []
+    saleList = []
     for result in results:
         row = {}
         if 'Cabin' in result:
@@ -98,10 +99,23 @@ def setData(results):
             row['Country'] = result['Country'] if 'UnitPrice' in result else 'None'
             row['id'] = result['id']
             retailList.append(row)
+        elif 'total_sqft' in result:
+            row['area_type'] = result['area_type'] if 'area_type' in result else 'None'
+            row['availability'] = result['availability'] if 'availability' in result else 'None'
+            row['location'] = result['location'] if 'location' in result else 'None'
+            row['size'] = result['size'] if 'size' in result else 'None'
+            row['society'] = result['society'] if 'society' in result else 'None'
+            row['total_sqft'] = result['total_sqft'] if 'total_sqft' in result else 0
+            row['bath'] = result['bath'] if 'bath' in result else 0
+            row['balcony'] = result['balcony'] if 'balcony' in result else 0
+            row['price'] = result['price']
+            row['id'] = result['id']
+            saleList.append(row)
 
 
     records['titanic'] = titanicList
     records['retail'] = retailList
+    records['sale'] = saleList
     return records
 
 
@@ -147,24 +161,38 @@ def save(request):
 
 
 def dataMigration(request):
+    """
+        This Function showes avalaible Dataset
+        Parameter:
+        request(request Object): Request contains ['Titanic','Sales','Retail'] Dataset Name to display
+        Method: Get
+
+    """
     availableData = ['Titanic','Sales','Retail']
     retailData = []
     titanicData = []
     salesData =[]
     name= request.GET.get('name')
-    print("================") 
+    
     print(name)
     if name =='Sales':
-        salesData = commonUtilities.getSalesData()
+        salesData = commonUtilities.getSalesData(flag = 2)
     elif name =='Retail':
-        retailData = commonUtilities.getReatailData()
+        retailData = commonUtilities.getReatailData(flag = 2)
     else:
-        titanicData = commonUtilities.titanicData()
+        titanicData = commonUtilities.titanicData(flag = 2)
     context = {'titanicData' : titanicData,'retailData':retailData,'salesData':salesData,'available':availableData,'collections':collectionLists()}
     return render(request, 'collection/data-migration.html', context)
 
 
 def makeMigration(request):
+    """
+        This Function is used to index dataset,updating FieldTypes,Fields and Copy Field according to selected dataset
+        Parameter:
+        request(request Object): Request contains ['Titanic','Sales','Retail'] Dataset Name to display
+        Method: POST
+
+    """
     collectionName = request.POST.get('collection')
     datasetName = request.POST.get('name')
     fieldTypes = request.POST.get('fieldTypes')
@@ -177,10 +205,6 @@ def makeMigration(request):
     print("fieldTypes:",fieldTypes)
     print("fields:",fields)
     print("copyFields:",copyFields)
-    commonUtilities.writeLog("khannsnsnsn")
-    commonUtilities.writeLog("\n")
-    commonUtilities.writeLog("mmmmmmmmmmmmmmmmmmmmm")
-    
     
     # Initialize Schema Instance
     solrSchema = SolrSchema(settings.SOLR_BASE_URL,collectionName)
@@ -188,38 +212,35 @@ def makeMigration(request):
     if int(fieldTypes) == 1: # Add Field Types
         print("Add Types")
         allFieldType = commonUtilities.getAllFieldsTypes()
-        # response = solrSchema.addFieldType(allFieldType)
+        response = solrSchema.addFieldType(allFieldType)
         commonUtilities.writeLog("\n =================Field Types Addes====================\n")
-        # commonUtilities.writeLog(response.content)
+        commonUtilities.writeLog(json.dumps(response))
        
 
     if int(fields) == 1:
         print("Add Field")
         fields_schema = preDefinedFields[datasetName]
-        # response = solrSchema.addFields(fields_schema)
+        # print(fields_schema)
+        response = solrSchema.addFields(fields_schema)
         commonUtilities.writeLog("\n =================Field  Addes====================\n")
-        # commonUtilities.writeLog(response.content)
+        commonUtilities.writeLog(json.dumps(response))
 
     if int(copyFields) == 1:
         print("Add Copy")
         copyField = commonUtilities.sampleCopyFields()
-        # response = solrSchema.addCopyField(copyField)
+        response = solrSchema.addCopyField(copyField)
         commonUtilities.writeLog("\n =================Add add Copy fields====================\n")
-        # commonUtilities.writeLog(response.content)
+        commonUtilities.writeLog(json.dumps(response))
     #====================Now Add Index using pySolr pacakege==============
     solr = solrInitialization(collectionName) # Initiate Core Instance
     dataset = commonUtilities.getSalesData() if datasetName == 'Sales' else commonUtilities.getReatailData() if datasetName =='Retail'  else commonUtilities.titanicData()
-    print(dataset)
+   
     print("===========",collectionName)
     solr.add(dataset)
     return redirect('data-migration')   
 
 
 def migrate(request):
-
-    colc = SolrCollection(settings.SOLR_BASE_URL)
-    response = colc.reloadCollection('MangoOrg')
-    print(response.content)
 
     import pandas as pd
     filePath = settings.BASE_DIR + "/solrTrain.csv"
@@ -237,13 +258,13 @@ def migrate(request):
         row['Embarked'] = result[5]
         titanicData.append(row)
 
-    solr = solrInitialization('MangoOrg') # Initiate Core Instance
+    # solr = solrInitialization('MangoOrg') # Initiate Core Instance
     #connect to Solr Apache: # Create a client instance. The timeout and authentication options are not required.
     # First remove All Data then index it
     # solr.delete(q='*:*')
     print("=================Migrate Data=============")
     print(row)
-    solr.add(row)
+    # solr.add(row)
    
     return redirect('home')   
 
@@ -531,9 +552,10 @@ def createCollection(request):
     c_replicationFactor = request.POST.get('replica')
     
     response = colc.createCollection(name = c_name,numShards = c_numShards,shards = c_shards,replicationFactor = c_replicationFactor)
-    messages.add_message(request, messages.SUCCESS, 'New Collection created')
+    # messages.add_message(request, messages.SUCCESS, 'New Collection created')
     
     status= response['responseHeader']
+    # print(response['response'])
     if status['status'] == 0:
          messages.add_message(request, messages.SUCCESS, 'New Collection created')
     else:

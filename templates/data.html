@@ -122,6 +122,7 @@
     </div>
     <!-- /.card-body -->
   </div>
+  {% if titanicData %}
   <div class="card card-secondary">
   <div class="card-header">
     <h3 class="card-title">Titanic Data</h3>
@@ -157,7 +158,8 @@
       </tr>
       {% endfor %}
   </table>
-
+  {% endif %}
+  {% if retailData %}
   <div class="card card-secondary">
     <div class="card-header">
       <h3 class="card-title">Retail Data</h3>
@@ -197,6 +199,50 @@
       </tr>
       {% endfor %}
   </table>
+  {% endif %}
+  {% if saleData %}
+  <div class="card card-secondary">
+    <div class="card-header">
+      <h3 class="card-title">Sales Data</h3>
+    </div>
+    </div>
+  <table id="example2" class="table table-bordered table-hover">
+    <thead>
+    <tr>
+      <!-- <th>ID</th> -->
+      <th>Area_type</th>
+      <th>Availability</th>
+      <th>Location</th>
+      <th>Size</th>
+      <th>Society</th>
+      <th>Total_sqft</th>
+      <th>Bath</th>
+      <th>Balcony</th>
+      <th>Price</th>
+      <th>Trash</th>
+    </tr>
+    </thead>
+    <tbody>
+      {% for row in saleData %}
+      <tr>
+        <!-- <th scope="row">{{row.id}}</th> -->
+        <th scope="row">{{row.area_type}}</th>
+        <td>{{row.availability}}</td>
+        <td>{{row.location}}</td>
+        <td>{{row.size}}</td>
+        <td>{{row.society}}</td>
+        <td>{{row.total_sqft}}</td>
+        <td>{{row.bath}}</td>
+        <td>{{row.balcony}}</td>
+        <td>{{row.price}}</td>
+        <td><a href= {% url 'delete' row.id %}>
+          Delete
+        </a></td>
+        
+      </tr>
+      {% endfor %}
+  </table>
+  {% endif %}
 </div>
 
 

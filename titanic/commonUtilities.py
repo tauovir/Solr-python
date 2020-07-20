@@ -13,8 +13,9 @@ def sampleDynamicFields():
 
 def sampleCopyFields():
     copyField = {}
-    copyField['source'] = '*_t' # the following line will copy the contents of all incoming fields that match the wildcard pattern *_t to the text field
-    copyField['dest'] = 'location'
+    # copyField['source'] = '*_t' # the following line will copy the contents of all incoming fields that match the wildcard pattern *_t to the text field
+    copyField['source'] = '*' 
+    copyField['dest'] = '_text_'
     return copyField
 
 def sampleFieldTypesFloat():
@@ -122,7 +123,7 @@ def getQueryFilterToken():
     return tokenizer,filters
 
 
-def getSalesData():
+def getSalesData(flag = 1):
     filePath = settings.BASE_DIR + "/sales_data_13000.csv"
     data = pd.read_csv(filePath)
     data.drop(data.columns[0], axis=1,inplace = True)
@@ -135,14 +136,20 @@ def getSalesData():
         row['location'] = (result[2])
         row['size'] = result[3]
         row['society'] = result[4]
-        row['total_sqft'] = result[5]
+        row['total_sqft'] = total_sqft(result[5])
         row['bath'] = int(result[6])
         row['balcony'] = int(result[7])
         row['price'] = result[8]
         salesData.append(row)
-    return salesData[:51]
+    if flag == 1:
+        return salesData
+    else:
+        return salesData[:51]
 
-def getReatailData():
+def total_sqft(string1):
+    return string1.split('-')[0]
+
+def getReatailData(flag = 1):
     filePath = settings.BASE_DIR + "/retail_data_5000.csv"
     data = pd.read_csv(filePath)
     data.drop(data.columns[0], axis=1,inplace = True)
@@ -159,10 +166,13 @@ def getReatailData():
         row['CustomerID'] = int(result[6])
         row['Country'] = result[7]
         retailData.append(row)
-    return retailData[:51]
+    if flag == 1:
+        return retailData
+    else:
+        return retailData[:51]
     
 
-def titanicData():
+def titanicData(flag = 1):
     filePath = settings.BASE_DIR + "/solrTrain.csv"
     data = pd.read_csv(filePath)
     data.drop(data.columns[0], axis=1,inplace = True)
@@ -177,7 +187,10 @@ def titanicData():
         row['Cabin'] = result[4]
         row['Embarked'] = result[5]
         titanicData.append(row)
-    return titanicData[:51]
+    if flag == 1:
+        return titanicData
+    else:
+        return titanicData[:51]
 
 
 def getTitanicFields():
@@ -196,10 +209,10 @@ def getTitanicFields():
             "name":"Embarked","type":"text_general","multiValued":False,"stored":True
         },
          {
-            "name":"Age","type":"nzfloat","default":'0',"multiValued":False,"stored":True
+            "name":"Age","type":"nzfloat"
         },
         {
-            "name":"Fare","type":"nzfloat2","default":'0',"multiValued":False,"stored":True
+            "name":"Fare","type":"nzfloat2"
         },
         ]
 
@@ -222,13 +235,13 @@ def getRetailFields():
             "name":"InvoiceDate","type":"text_general","multiValued":False,"stored":True
         },
         {
-            "name":"UnitPrice","type":"nzfloat2","default":'0',"multiValued":False,"stored":True
+            "name":"UnitPrice","type":"nzfloat2"
         },
         {
             "name":"CustomerID","type":"nzint","multiValued":False,"stored":True
         },
         {
-            "name":"Country","type":"text_general","default":'0',"multiValued":False,"stored":True
+            "name":"Country","type":"text_general","multiValued":False,"stored":True
         },
         ]
 
@@ -250,7 +263,7 @@ def getSalesFields():
             "name":"society","type":"text_general","multiValued":False,"stored":True
         },
         {
-            "name":"total_sqft","type":"text_general","default":'0',"multiValued":False,"stored":True
+            "name":"total_sqft","type":"text_general","multiValued":False,"stored":True
         },
         {
             "name":"bath","type":"nzint","multiValued":False,"stored":True

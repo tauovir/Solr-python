@@ -63,7 +63,8 @@ class SolrSchema:
         payload = json.dumps(self.field)  
         print(payload)
         response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
-        return response
+        # return response
+        return self.returnResponse('json',response)
      
   
     def deleteSingleFiled(self,dictionaryData):
@@ -130,7 +131,8 @@ class SolrSchema:
         payload = json.dumps(self.field)  
         print(payload)
         response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
-        return response
+        # return response
+        return self.returnResponse('json',response)
 
    
     def deleteCopyField(self,dictionaryData : dict): #requured param:,source,dest,maxChars
@@ -177,8 +179,8 @@ class SolrSchema:
         payload = json.dumps(self.field)  
         print("Add Field Types")
         response = requests.request("POST", self.fullUrl, headers = self.headers, data = payload)
-        # return self.returnResponse('json',response)
-        return response
+        return self.returnResponse('json',response)
+        # return response
     
     def deleteFieldType(self,fieldName):
         """

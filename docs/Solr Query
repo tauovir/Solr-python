@@ -1,0 +1,28 @@
+
+
+=================Solr Query====================
+sort (asc|desc): sort the returned documents in a specific order. You can combine several sort in one single query. e.g., sort=inStock, desc, price asc
+Quantity desc,UnitPrice asc
+Filter Query(fl) :it’s used to specify the set of fields that you want to return in your results sets
+StockCode,Country,Quantity
+
+fq: it’s a very powerful parameter that helps you to filter the returned documents. For instance, to search for BMWs cheaper than $15000, you can specify the following parameters: fq=price:[* TO 15000]&fq=make:BMW
+
+Query(q):
+1> Country : Kingdom & Quantity : 1
+2> Quantity:[* TO 800]
+3> (Sex:"female" AND Cabin:"C103") OR Country :"France" 
+4> Sex:female -Name:"Heikkinen, Miss. Laina"				#Search for Sex "female" and not for Name "Heikkinen, Miss. Laina" in the title field.
+ #==================Wildcard matching==============
+ Name: John*							#Search for any word that starts with "John" in the Name field.
+
+Range searches:
+total_sqft: [100 TO 1400]
+bath: [3 TO 5]
+total_sqft:[1200 TO *] finds all field values greater than or equal to 1200 
+total_sqft:[* TO 1200] finds all field values less than or equal to 1200 
+
+
+apache Elsatic
+apache Basic
+
